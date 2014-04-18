@@ -1,5 +1,5 @@
 angular.module('grnk')
-.service('context', function ()
+.service('audioContext', function ()
 {
     var AudioContext = window.AudioContext || window.webkitAudioContext
     return new AudioContext()

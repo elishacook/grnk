@@ -1,6 +1,6 @@
 angular.module('grnk')
 
-.service('RemoteFile', function ($q, context)
+.factory('RemoteFile', function ($q, audioContext)
 {
     var loadOne = function (url)
     {
@@ -27,7 +27,7 @@ angular.module('grnk')
         {
             if (req.status == 200)
             {
-                context.decodeAudioData(req.response, function (buffer)
+                audioContext.decodeAudioData(req.response, function (buffer)
                 {
                     defer.resolve(buffer)
                 })

@@ -1,12 +1,40 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>My App</title>
+        <title>Grnk</title>
         <link rel="stylesheet" type="text/css" href="/css/common.css">
     </head>
     <body>
         <div ng-app="grnk">
-            <div ng-controller="AppCtrl"></div>
+            <div ng-controller="AppCtrl">
+                <div class="transport">
+                    <form>
+                        <button ng-disabled="disabled" ng-click="clock.play()">Play</button>
+                        <button ng-disabled="disabled" ng-click="clock.pause()">Pause</button>
+                        <button ng-disabled="disabled" ng-click="clock.stop()">Stop</button>
+                    </form>
+                </div>
+                <table class="song-position">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Bar</th>
+                            <th>Beat</th>
+                            <th>Tick</th>
+                            <th>BPM</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>{{ clock.elapsed | songTime }}</td>
+                            <td>{{ clock.barNumber + 1 }}</td>
+                            <td>{{ clock.beatNumber + 1 }}</td>
+                            <td>{{ clock.tickNumber + 1 }}</td>
+                            <td><grnk-number amount="clock.beatsPerMinute"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
         <script type="text/javascript" src="/js/vendor.js"></script>
         <script type="text/javascript" src="/js/templates.js"></script>
