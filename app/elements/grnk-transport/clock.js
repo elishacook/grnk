@@ -1,7 +1,11 @@
-angular.module('grnk')
-
-.factory('Clock', function (audioContext)
+depin.define('GrnkClock', function (grnkAudioContext)
 {
+    'use strict';
+    
+    // Workaround so that the clock starts even
+    // if no audio nodes have been created
+    grnkAudioContext.createGainNode()
+    
     var Clock = function ()
     {
         this._bound_schedule = this._schedule.bind(this)
@@ -15,7 +19,7 @@ angular.module('grnk')
         interval: 0.025,
         
         // Tempo and meter
-        beatsPerMinute: 125,
+        _beatsPerMinute: 125,
         beatsPerBar: 4,
         ticksPerBeat: 4,
         
@@ -40,6 +44,9 @@ angular.module('grnk')
         // Called when there is a tick
         ontick: function (clock) {},
         
+        // Called when the elapsed time changes
+        onelapse: function (clock) {},
+        
         play: function ()
         {
             if (this.running)
@@ -55,15 +62,14 @@ angular.module('grnk')
             if (this.paused)
             {
                 var oldtime = this.time
-                this.time = audioContext.currentTime
+                this.time = grnkAudioContext.currentTime
                 var offset = this.time - oldtime
                 this.tickTime += offset
                 this.offset += offset
             }
             else
             {
-                this.time = audioContext.currentTime
-                this.startTime = this.time
+                this.time = this.startTime = this.tickTime = grnkAudioContext.currentTime
             }
             
             this.running = true
@@ -100,6 +106,31 @@ angular.module('grnk')
             this.offset = 0
         },
         
+        get beatsPerMinute()
+        {
+            return this._beatsPerMinute
+        },
+        
+        set beatsPerMinute(value)
+        {
+            if (this.running)
+            {
+                if (this.timeout)
+                {
+                    clearTimeout(this.timeout)
+                }
+                
+                this._previousTick()
+                this._beatsPerMinute = value
+                this._nextTick()
+                this._schedule()
+            }
+            else
+            {
+                this._beatsPerMinute = value
+            }
+        },
+        
         _schedule: function ()
         {
             if (!this.running)
@@ -107,23 +138,24 @@ angular.module('grnk')
                 return
             }
             
-            this.time = audioContext.currentTime
+            this.time = grnkAudioContext.currentTime
             this.elapsed = this.time - this.startTime - this.offset
+            this.onelapse(this)
             
             while (this.tickTime < this.time + this.lookahead)
             {
-                this.ontick.apply(this)
-                this._updatePosition()
+                this.ontick(this)
+                this._nextTick()
             }
             
             var nextScheduleTime = this.time + this.interval,
-                interval = nextScheduleTime - audioContext.currentTime
+                interval = nextScheduleTime - grnkAudioContext.currentTime
             this.timeout = setTimeout(this._bound_schedule, interval * 1000)
         },
         
-        _updatePosition: function ()
+        _nextTick: function ()
         {
-            this.tickDuration = 60.0 / this.beatsPerMinute / this.ticksPerBeat
+            this.tickDuration = 60.0 / this._beatsPerMinute / this.ticksPerBeat
             this.tickTime = this.tickTime + this.tickDuration
             this.tickNumber = (this.tickNumber + 1) % this.ticksPerBeat
             
@@ -135,6 +167,30 @@ angular.module('grnk')
                 {
                     this.barNumber += 1
                 }
+            }
+        },
+        
+        _previousTick: function ()
+        {
+            this.tickTime = this.tickTime - this.tickDuration
+            
+            if (this.tickNumber == 0)
+            {
+                this.tickNumber = this.ticksPerBeat - 1
+                
+                if (this.beatNumber == 0)
+                {
+                    this.beatNumber = this.beatsPerBar - 1
+                    this.barNumber--
+                }
+                else
+                {
+                    this.beatNumber--
+                }
+            }
+            else
+            {
+                this.tickNumber--
             }
         }
     }
