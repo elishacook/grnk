@@ -1,0 +1,13 @@
+CFLAGS += -Wall
+CFLAGS += -O0
+CFLAGS += -g
+CFLAGS += -std=c99
+
+LDFLAGS += -g
+
+CC = gcc
+AR = ar
+
+!cc = |> $(CC) $(CFLAGS) -c %f -o %o |> %B.o
+!ar = |> $(AR) rcs %o %f |>
+!ld = |> $(CC) $(LDFLAGS) %f -o %o $(LIBS) |>

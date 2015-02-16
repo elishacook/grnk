@@ -1,0 +1,5 @@
+include_rules
+LIBS += -lportaudio
+LIBS += -lm
+: foreach *.c |> !cc |>
+: *.o audio/libaudio.a |> !ld |> ../build/grnk

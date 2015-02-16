@@ -1,0 +1,1 @@
+Learning some audio synthesis and some more C. Maybe it'll be a thing some day.
